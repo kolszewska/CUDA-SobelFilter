@@ -1,5 +1,6 @@
 #include <vector>
 #include <ctime>
+#include <math.h>
 
 #include "Image.h"
 
