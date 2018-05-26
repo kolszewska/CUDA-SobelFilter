@@ -1,4 +1,5 @@
 #include <vector>
+#include <ctime>
 
 #include "Image.h"
 
@@ -6,7 +7,9 @@
 
 class Sobel {
 public:
-	 static void applySobelFilter(Image* image);
+	 static void applySobelFilterOnCpu(Image* image);
+	 static void applySobelFilterOnGpu(Image* image);
+
 	 static std::vector<unsigned char> getNewChannelValues(std::vector<unsigned char> channel, int image_width, int image_height);
 	 static int computeXGradient(std::vector<unsigned char> channel, int index, int image_width);
 	 static int computeYGradient(std::vector<unsigned char> channel, int index, int image_width);
