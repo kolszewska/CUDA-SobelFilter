@@ -30,6 +30,6 @@ public:
 	void extractChannels();
 	void combineChannels();
 private:
-	const char* inputFilename = "valve.png";
-	const char* outputFilename = "test.png";
+	const char* inputFilename = "in.png";
+	const char* outputFilename = "out.png";
 };
