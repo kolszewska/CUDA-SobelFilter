@@ -26,10 +26,10 @@ public:
 	unsigned width, height;
 
 	void loadImage();
-	void saveImage();
+	void saveImage(const char *name);
 	void extractChannels();
 	void combineChannels();
 private:
 	const char* inputFilename = "in.png";
-	const char* outputFilename = "out.png";
+//	const char* outputFilename = "out.png";
 };

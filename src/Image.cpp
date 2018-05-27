@@ -15,9 +15,9 @@ void Image::loadImage() {
 	}
 }
 
-void Image::saveImage() {
+void Image::saveImage(const char* name) {
 	combineChannels();
-	unsigned encoding_error = lodepng::encode(outputFilename, out_pixels, width, height);
+	unsigned encoding_error = lodepng::encode(name, out_pixels, width, height);
 	if (encoding_error) {
 		std::cout << "Encoder error " << encoding_error << ": " << lodepng_error_text(encoding_error) << std::endl;
 	}
