@@ -4,6 +4,7 @@
 int main(int argc, char *argv[])
 {
     Image *image = new Image;
+    image->loadImage("in.png");
     Sobel::applySobelFilterOnCpu(image);
     image->saveImage("cpu.png");
     Sobel::applySobelFilterOnGpu(image);

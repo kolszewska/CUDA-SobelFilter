@@ -1,18 +1,17 @@
 #include "Image.h"
 
 Image::Image() {
-	loadImage();
-	extractChannels();
 }
 
 Image::~Image() {
 }
 
-void Image::loadImage() {
-	unsigned decoding_error = lodepng::decode(pixels, width, height, inputFilename);
+void Image::loadImage(const char* name) {
+	unsigned decoding_error = lodepng::decode(pixels, width, height, name);
 	if (decoding_error) {
 		std::cout << "Decoder error " << decoding_error << ": " << lodepng_error_text(decoding_error) << std::endl;
 	}
+    extractChannels();
 }
 
 void Image::saveImage(const char* name) {
