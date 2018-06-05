@@ -1,13 +1,2 @@
-# Visual
-*.sln
-*.vcxproj
-*.filters
-*.user
-.vs/
-Debug/
-
-# Executables
-*.exe
-
 # Pictures
 *.png
