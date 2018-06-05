@@ -20,7 +20,7 @@ std::vector<unsigned char> Sobel::getNewChannelValues(std::vector<unsigned char>
     for (int x = 1; x < image_width * image_height - 2; x++) {
         int x_gradient = computeXGradient(channel, x, image_width);
         int y_gradient = computeYGradient(channel, x, image_width);
-        new_channel_values.push_back(normalizeGradient(computeGradientLength(x_gradient,  y_gradient)));
+        new_channel_values.push_back(normalizeGradient(computeGradientLength(x_gradient, y_gradient)));
     }
     return new_channel_values;
 }
@@ -69,7 +69,7 @@ int Sobel::normalizeGradient(int gradient_value) {
     if (gradient_value > 255) {
         return 255;
     }
-        return gradient_value;
+    return gradient_value;
 }
 void Sobel::applySobelFilterOnGpu(Image* image) {
     clock_t begin = clock();

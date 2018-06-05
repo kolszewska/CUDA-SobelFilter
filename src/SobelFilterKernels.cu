@@ -1,60 +1,50 @@
 #include <cuda_runtime.h>
-#include <stdio.h>
 
 __global__ void cudaComputeXGradient(int* x_gradient, unsigned char* channel, int image_width, int image_height) {
+    int x_kernel[3][3] = { { 1, 0, -1 }, { 2, 0, -2 }, { 1, 0, -1 } }; 
     int index = blockIdx.x * blockDim.x + threadIdx.x;
- if(index ==0) {
-	return;
-}
-int a[3][3] = { { 1, 0, -1 }, { 2, 0, -2 }, { 1, 0, -1 } }; 
-x_gradient[index] =
-        a[0][0] * channel[index - 1] +
-        a[1][0] * channel[index] +
-        a[2][0] * channel[index + 1] +
-        a[0][1] * channel[index + image_width - 1] +
-        a[1][1] * channel[index + image_width] +
-        a[2][1] * channel[index + image_width + 1] +
-        a[0][2] * channel[index + 2 * image_width - 1] +
-        a[1][2] * channel[index + 2 * image_width] +
-        a[2][2] * channel[index + 2 * image_width + 1];
+    if (index == 0) {
+	    return;
+    }
+    x_gradient[index] =
+        x_kernel[0][0] * channel[index - 1] +
+        x_kernel[1][0] * channel[index] +
+        x_kernel[2][0] * channel[index + 1] +
+        x_kernel[0][1] * channel[index + image_width - 1] +
+        x_kernel[1][1] * channel[index + image_width] +
+        x_kernel[2][1] * channel[index + image_width + 1] +
+        x_kernel[0][2] * channel[index + 2 * image_width - 1] +
+        x_kernel[1][2] * channel[index + 2 * image_width] +
+        x_kernel[2][2] * channel[index + 2 * image_width + 1];
     return;
 }
 
 __global__ void cudaComputeYGradient(int* y_gradient, unsigned char* channel, int image_width, int image_height) {
+    int y_kernel[3][3] = { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } }; 
     int index = blockIdx.x * blockDim.x + threadIdx.x;
-    if(index ==0) {
-	return;
-}
-int b[3][3] = { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } }; 
-y_gradient[index] =
-        b[0][0] * channel[index - 1] +
-        b[1][0] * channel[index] +
-        b[2][0] * channel[index + 1] +
-        b[0][1] * channel[index + image_width - 1] +
-        b[1][1] * channel[index + image_width] +
-        b[2][1] * channel[index + image_width + 1] +
-        b[0][2] * channel[index + 2 * image_width - 1] +
-        b[1][2] * channel[index + 2 * image_width] +
-        b[2][2] * channel[index + 2 * image_width + 1];
-    return;
-}
-
-__global__ void cudaComputeGradientLength(unsigned char *channel_values, int* x_gradient, int* y_gradient) {
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
-    int dupa = int(sqrt(float(x_gradient[index] * x_gradient[index] + y_gradient[index] * y_gradient[index])));
-    if (dupa > 255) {
-	dupa = 255;
+    if (index == 0) {
+	    return;
     }
-	channel_values[index] = dupa;
+    y_gradient[index] =
+        y_kernel[0][0] * channel[index - 1] +
+        y_kernel[1][0] * channel[index] +
+        y_kernel[2][0] * channel[index + 1] +
+        y_kernelb[0][1] * channel[index + image_width - 1] +
+        y_kernel[1][1] * channel[index + image_width] +
+        y_kernel[2][1] * channel[index + image_width + 1] +
+        y_kernel[0][2] * channel[index + 2 * image_width - 1] +
+        y_kernel[1][2] * channel[index + 2 * image_width] +
+        y_kernel[2][2] * channel[index + 2 * image_width + 1];
     return;
 }
 
-__global__ void cudaNormalizeGradient(unsigned char* channel_values) {
+__global__ void cudaComputeAndNormalizeGradientLength(unsigned char *channel_values, int* x_gradient, int* y_gradient) {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
-    if (channel_values[index] > 255) {
-        channel_values[index] = int(255);
-    } 
-    channel_values[index] = int(channel_values[index]);
+    int gradient_length = int(sqrt(float(x_gradient[index] * x_gradient[index] + y_gradient[index] * y_gradient[index])));
+    if (gradient_length > 255) {
+        gradient_length = 255;
+    }
+	channel_values[index] = gradient_length;
     return;
 }
 
@@ -80,9 +70,7 @@ extern "C" unsigned char* cudaGetNewChannelValues(unsigned char* channel, int im
     cudaComputeYGradient<<<blocks_per_grid, threads_per_block>>>(y_gradient, device_old_channel_values,
             image_width, image_height);
 
-    cudaComputeGradientLength<<<blocks_per_grid, threads_per_block>>>(device_new_channel_values, x_gradient, y_gradient);
-
-//    cudaNormalizeGradient<<<blocks_peir_grid, threads_per_block>>>(device_new_channel_values);
+    cudaComputeAndNormalizeGradientLength<<<blocks_per_grid, threads_per_block>>>(device_new_channel_values, x_gradient, y_gradient);
 
     unsigned char* host_new_channel_values = new unsigned char[image_width * image_height * sizeof(unsigned char)];
 	
