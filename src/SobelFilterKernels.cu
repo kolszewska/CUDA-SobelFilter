@@ -29,7 +29,7 @@ __global__ void cudaComputeYGradient(int* y_gradient, unsigned char* channel, in
         y_kernel[0][0] * channel[index - 1] +
         y_kernel[1][0] * channel[index] +
         y_kernel[2][0] * channel[index + 1] +
-        y_kernelb[0][1] * channel[index + image_width - 1] +
+        y_kernel[0][1] * channel[index + image_width - 1] +
         y_kernel[1][1] * channel[index + image_width] +
         y_kernel[2][1] * channel[index + image_width + 1] +
         y_kernel[0][2] * channel[index + 2 * image_width - 1] +
