@@ -1,5 +1,7 @@
 #include "Sobel.h"
 
+extern "C" void cudaStart();
+extern "C" float cudaStop();
 extern "C" unsigned char* cudaGetNewChannelValues(unsigned char* channel, int image_width, int image_height);
 
 int Sobel::g_x_kernel[3][3] = { { 1, 0, -1 }, { 2, 0, -2 }, { 1, 0, -1 } };
@@ -72,12 +74,13 @@ int Sobel::normalizeGradient(int gradient_value) {
     return gradient_value;
 }
 void Sobel::applySobelFilterOnGpu(Image* image) {
-    clock_t begin = clock();
 
     unsigned char* out_r_channel;
     unsigned char* out_g_channel;
     unsigned char* out_b_channel;
+    float elapsed_time;
 
+    cudaStart();
     out_r_channel = cudaGetNewChannelValues(reinterpret_cast<unsigned char*> (image->r_channel.data()),
             image->width, image->height);
 
@@ -86,10 +89,9 @@ void Sobel::applySobelFilterOnGpu(Image* image) {
 
     out_b_channel = cudaGetNewChannelValues(reinterpret_cast<unsigned char*> (image->b_channel.data()),
             image->width, image->height);
+    elapsed_time = cudaStop();
 
-    clock_t end = clock();
-    double execution_time = double(end - begin) / CLOCKS_PER_SEC;
-    printf("[GPU] Elapsed time: %.2f\n", execution_time);
+    printf("[GPU] Elapsed time: %.2f seconds\n", elapsed_time);
 
     out_r_channel = &out_r_channel[1];
     out_g_channel = &out_g_channel[1];

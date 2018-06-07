@@ -1,5 +1,7 @@
 #include <cuda_runtime.h>
 
+cudaEvent_t start, stop;
+
 __global__ void cudaComputeXGradient(int* x_gradient, unsigned char* channel, int image_width, int image_height) {
     int x_kernel[3][3] = { { 1, 0, -1 }, { 2, 0, -2 }, { 1, 0, -1 } }; 
     int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -48,6 +50,22 @@ __global__ void cudaComputeAndNormalizeGradientLength(unsigned char *channel_val
     return;
 }
 
+extern "C" void startCuda() {
+    cudaEventCreate(&start);
+    cudaEventRecord(start,0);
+} 
+
+extern "C" float stopCuda() {
+    float elapsed_time;
+
+    cudaEventCreate(&stop);
+    cudaEventRecord(stop,0);
+    cudaEventSynchronize(stop);
+   
+    cudaEventElapsedTime(&elapsed_time, start, stop);
+    return elapsed_time;
+}
+
 extern "C" unsigned char* cudaGetNewChannelValues(unsigned char* channel, int image_width, int image_height) {
     unsigned char* device_new_channel_values;
     unsigned char* device_old_channel_values;
@@ -63,7 +81,7 @@ extern "C" unsigned char* cudaGetNewChannelValues(unsigned char* channel, int im
 
     int threads_per_block = 16;
     int blocks_per_grid = (image_width * image_height)/threads_per_block;	
-	
+
     cudaComputeXGradient<<<blocks_per_grid, threads_per_block>>>(x_gradient, device_old_channel_values,
             image_width, image_height);
 
@@ -76,7 +94,7 @@ extern "C" unsigned char* cudaGetNewChannelValues(unsigned char* channel, int im
 	
     cudaMemcpy(host_new_channel_values, device_new_channel_values, sizeof(unsigned char) * image_width * image_height,
         cudaMemcpyDeviceToHost);
-        
+
     return host_new_channel_values;
 }
 
