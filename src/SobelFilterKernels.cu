@@ -63,6 +63,10 @@ extern "C" float cudaStop() {
     cudaEventSynchronize(stop);
    
     cudaEventElapsedTime(&elapsed_time, start, stop);
+
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
+
     return elapsed_time;
 }
 
@@ -94,6 +98,12 @@ extern "C" unsigned char* cudaGetNewChannelValues(unsigned char* channel, int im
 	
     cudaMemcpy(host_new_channel_values, device_new_channel_values, sizeof(unsigned char) * image_width * image_height,
         cudaMemcpyDeviceToHost);
+
+    cudaFree(&device_new_channel_values);
+    cudaFree(&device_old_channel_values);
+    cudaFree(&x_gradient);
+    cudaFree(&y_gradient);
+    delete[] host_new_channel_values;
 
     return host_new_channel_values;
 }

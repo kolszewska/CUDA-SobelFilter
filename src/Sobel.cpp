@@ -13,8 +13,8 @@ void Sobel::applySobelFilterOnCpu(Image* image) {
     image->out_g_channel = getNewChannelValues(image->g_channel, image->width, image->height);
     image->out_b_channel = getNewChannelValues(image->b_channel, image->width, image->height);
     clock_t end = clock();
-    double execution_time = double(end - begin) / CLOCKS_PER_SEC;
-    printf("[CPU] Elapsed time: %.2f seconds\n", execution_time);
+    double elapsed_time = double(end - begin) / CLOCKS_PER_SEC;
+    printf("[CPU] Elapsed time: %.5f seconds\n", elapsed_time);
 }
 
 std::vector<unsigned char> Sobel::getNewChannelValues(std::vector<unsigned char> channel, int image_width, int image_height) {
@@ -91,7 +91,7 @@ void Sobel::applySobelFilterOnGpu(Image* image) {
             image->width, image->height);
     elapsed_time = cudaStop();
 
-    printf("[GPU] Elapsed time: %.2f seconds\n", elapsed_time);
+    printf("[GPU] Elapsed time: %.5f seconds\n", elapsed_time/1000.0);
 
     out_r_channel = &out_r_channel[1];
     out_g_channel = &out_g_channel[1];
