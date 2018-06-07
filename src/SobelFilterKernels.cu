@@ -50,12 +50,12 @@ __global__ void cudaComputeAndNormalizeGradientLength(unsigned char *channel_val
     return;
 }
 
-extern "C" void startCuda() {
+extern "C" void cudaStart() {
     cudaEventCreate(&start);
     cudaEventRecord(start,0);
 } 
 
-extern "C" float stopCuda() {
+extern "C" float cudaStop() {
     float elapsed_time;
 
     cudaEventCreate(&stop);

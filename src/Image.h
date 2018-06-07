@@ -2,7 +2,7 @@
 #include <fstream>
 #include <vector>
 
-#include "lodepng.h"
+#include "lib/lodepng.h"
 
 #pragma once
 
