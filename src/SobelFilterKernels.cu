@@ -84,13 +84,11 @@ extern "C" unsigned char* cudaGetNewChannelValues(unsigned char* channel, int im
     cudaMalloc(&y_gradient, (image_width * image_height) * sizeof(int));
 
     int threads_per_block = 16;
-    int blocks_per_grid = (image_width * image_height)/threads_per_block;	
+    int blocks_per_grid = (image_width * image_height) / threads_per_block;
 
-    cudaComputeXGradient<<<blocks_per_grid, threads_per_block>>>(x_gradient, device_old_channel_values,
-            image_width, image_height);
+    cudaComputeXGradient<<<blocks_per_grid, threads_per_block>>>(x_gradient, device_old_channel_values, image_width, image_height);
 
-    cudaComputeYGradient<<<blocks_per_grid, threads_per_block>>>(y_gradient, device_old_channel_values,
-            image_width, image_height);
+    cudaComputeYGradient<<<blocks_per_grid, threads_per_block>>>(y_gradient, device_old_channel_values, image_width, image_height);
 
     cudaComputeAndNormalizeGradientLength<<<blocks_per_grid, threads_per_block>>>(device_new_channel_values, x_gradient, y_gradient);
 
@@ -107,4 +105,3 @@ extern "C" unsigned char* cudaGetNewChannelValues(unsigned char* channel, int im
 
     return host_new_channel_values;
 }
-
