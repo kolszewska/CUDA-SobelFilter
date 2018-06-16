@@ -64,28 +64,24 @@ void Sobel::applySobelFilterOnGpuChunked(Image* image, int threads_per_block, in
     cudaStart();
     out_r_channel = cudaGetNewChannelValuesChunked(reinterpret_cast<unsigned char*> (image->r_channel.data()),
             image->width, image->height, threads_per_block, blocks_per_grid);
-
     out_g_channel = cudaGetNewChannelValuesChunked(reinterpret_cast<unsigned char*> (image->g_channel.data()),
             image->width, image->height, threads_per_block, blocks_per_grid);
-
     out_b_channel = cudaGetNewChannelValuesChunked(reinterpret_cast<unsigned char*> (image->b_channel.data()),
             image->width, image->height, threads_per_block, blocks_per_grid);
     elapsed_time = cudaStop();
 
     printf("\n[GPU] Elapsed time: %.5f seconds - %d threads per block, %d blocks per grid.\n", elapsed_time/1000.0, threads_per_block, blocks_per_grid);
-
     out_r_channel = &out_r_channel[1];
     out_g_channel = &out_g_channel[1];
     out_b_channel = &out_b_channel[1];
-
+	
     std::vector<unsigned char> r_channel(out_r_channel, out_r_channel + image->width * image->height);
     std::vector<unsigned char> g_channel(out_g_channel, out_g_channel + image->width * image->height);
     std::vector<unsigned char> b_channel(out_b_channel, out_b_channel + image->width * image->height);
-
+    
     image->out_r_channel = r_channel;
     image->out_g_channel = g_channel;
     image->out_b_channel = b_channel;
-
     return;
 }
 std::vector<unsigned char> Sobel::getNewChannelValues(std::vector<unsigned char> channel, int image_width, int image_height) {

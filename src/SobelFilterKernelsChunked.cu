@@ -1,11 +1,13 @@
 #include <cuda_runtime.h>
+#include <stdio.h>
 
 __global__ void cudaComputeXGradient(int* x_gradient, unsigned char* channel, int image_width, int image_height, int chunk_size_per_thread) {
     int x_kernel[3][3] = { { 1, 0, -1 }, { 2, 0, -2 }, { 1, 0, -1 } }; 
     
     int index = blockIdx.x * blockDim.x + threadIdx.x;
-
-    for (int i = index * chunk_size_per_thread; i < (index + 1) * chunk_size_per_thread; i++) {
+     
+    for (int i = index * chunk_size_per_thread; i < (index + 1) * chunk_size_per_thread - 1; i++) {
+	if (i + 2 * image_width + 1 < image_width * image_height) {
         if (i == 0 && blockIdx.x == 0 && threadIdx.x == 0) {
             continue;
         } else {
@@ -21,14 +23,15 @@ __global__ void cudaComputeXGradient(int* x_gradient, unsigned char* channel, in
                 x_kernel[2][2] * channel[i + 2 * image_width + 1];
         }
     }
+}
     return;
 }
 
 __global__ void cudaComputeYGradient(int* y_gradient, unsigned char* channel, int image_width, int image_height, int chunk_size_per_thread) {
     int y_kernel[3][3] = { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } }; 
     int index = blockIdx.x * blockDim.x + threadIdx.x;
-   
-    for (int i = index * chunk_size_per_thread; i < (index + 1) * chunk_size_per_thread; i++) {
+    for (int i = index * chunk_size_per_thread; i < (index + 1) * chunk_size_per_thread - 1; i++) {
+        if (i + 2 * image_width + 1 < image_width * image_height) {
         if (i == 0 && blockIdx.x == 0 && blockIdx.x == 0) {
             continue;
         } else {
@@ -44,6 +47,7 @@ __global__ void cudaComputeYGradient(int* y_gradient, unsigned char* channel, in
                 y_kernel[2][2] * channel[i + 2 * image_width + 1];
         }
     }
+}
     return;
 }
 
@@ -72,8 +76,8 @@ extern "C" unsigned char* cudaGetNewChannelValuesChunked(unsigned char* channel,
     cudaMalloc(&x_gradient, (image_width * image_height) * sizeof(int));
     cudaMalloc(&y_gradient, (image_width * image_height) * sizeof(int));
 
-    int chunk_size_per_block = (image_width * image_height) / blocks_per_grid;
-    int chunk_size_per_thread = chunk_size_per_block / threads_per_block;
+    int chunk_size_per_block = ((image_width * image_height) + blocks_per_grid - 1) / blocks_per_grid;
+    int chunk_size_per_thread = (chunk_size_per_block + threads_per_block - 1) / threads_per_block;
 
     cudaComputeXGradient<<<blocks_per_grid, threads_per_block>>>(x_gradient, device_old_channel_values, image_width, image_height, chunk_size_per_thread);
 
@@ -86,10 +90,10 @@ extern "C" unsigned char* cudaGetNewChannelValuesChunked(unsigned char* channel,
     cudaMemcpy(host_new_channel_values, device_new_channel_values, sizeof(unsigned char) * image_width * image_height,
         cudaMemcpyDeviceToHost);
 
-    cudaFree(&device_new_channel_values);
-    cudaFree(&device_old_channel_values);
-    cudaFree(&x_gradient);
-    cudaFree(&y_gradient);
+    cudaFree(device_new_channel_values);
+    cudaFree(device_old_channel_values);
+    cudaFree(x_gradient);
+    cudaFree(y_gradient);
     delete[] host_new_channel_values;
 
     return host_new_channel_values;

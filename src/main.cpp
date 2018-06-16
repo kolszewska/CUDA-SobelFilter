@@ -42,6 +42,7 @@ int main(int argc, char *argv[]) {
 
     if (chunked) {
         Sobel::applySobelFilterOnGpuChunked(image, threads_per_block, blocks_per_grid);
+	printf("Saving image...\n");
     } else {
         Sobel::applySobelFilterOnGpu(image);
     }
